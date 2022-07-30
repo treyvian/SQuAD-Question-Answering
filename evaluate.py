@@ -271,7 +271,7 @@ def main():
         preds = json.load(f)
     if OPTS.na_prob_file:
         with open(OPTS.na_prob_file) as f:
-        na_probs = json.load(f)
+            na_probs = json.load(f)
     else:
         na_probs = {k: 0.0 for k in preds}
     qid_to_has_ans = make_qid_to_has_ans(dataset)  # maps qid to True/False
@@ -289,25 +289,24 @@ def main():
         if OPTS.na_prob_file:
             find_all_best_thresh(out_eval, preds, exact_raw, f1_raw, na_probs, qid_to_has_ans)
         if OPTS.na_prob_file and OPTS.out_image_dir:
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs,
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-    run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-        run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
             run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
-                                        qid_to_has_ans, OPTS.out_image_dir)
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs, 
+            run_precision_recall_analysis(out_eval, exact_raw, f1_raw, na_probs,qid_to_has_ans, OPTS.out_image_dir)
             histogram_na_prob(na_probs, has_ans_qids, OPTS.out_image_dir, 'hasAns')
+
         if OPTS.out_file:
             with open(OPTS.out_file, 'w') as f:
             json.dump(out_eval, f)
