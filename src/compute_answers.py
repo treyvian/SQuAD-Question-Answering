@@ -22,7 +22,7 @@ from tqdm.auto import tqdm
 import collections
 
 
-
+# ------------------------------------------------------------
 def flatten_input(input_data):
     """Flattens the input data"""
     
@@ -41,13 +41,14 @@ def flatten_input(input_data):
                 question = qa["question"].strip()
                 id_ = qa["id"]
 
-                data.append({'title': title,
+                flattened_data.append({'title': title,
                             'context': context,
                             'question': question,
                             'id': id_})
     return flattened_data
 
-def prepare_features(examples, max_len):
+# ------------------------------------------------------------
+def prepare_features(examples):
 
     tokenized_examples = tokenizer(
         examples["question"],
@@ -77,6 +78,7 @@ def prepare_features(examples, max_len):
             
     return tokenized_examples
 
+# ------------------------------------------------------------
 def postprocess_qa_predictions(examples, 
                                features, 
                                raw_predictions, 
@@ -158,7 +160,7 @@ def postprocess_qa_predictions(examples,
  
     return predictions 
 
-
+# ------------------------------------------------------------
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
@@ -168,8 +170,8 @@ if __name__ == '__main__':
 
     ### Parameters ###
 
-    model = "distilbert"
-    max_length = 384  # The maximum length of a feature (question and context)
+    model = "distilroberta-base"
+    max_len = 384  # The maximum length of a feature (question and context)
     doc_stride = 128  # The authorized overlap between two part of the context 
                       # when splitting it is needed.
     batch_size = 32
@@ -178,49 +180,63 @@ if __name__ == '__main__':
 
 
     #### Load data ####
+    print(f"#########################################################")
+    print(f"Loading Data")
+    print(f"#########################################################")
 
     path_to_json = args.path_to_json_file
 
     input_data = pd.read_json(path_to_json)
     
-    print(f'length input dataset: {len(input_data["data"])}')
+    print(f'Length input dataset: {len(input_data["data"])}')
     
     data = flatten_input(input_data)
+    data_df = pd.DataFrame(data)
 
-    print(f"length data after flattening: {len(data)}")
+    print(f"Length data after flattening: {len(data)}")
 
-    ##### Load model ####
+    ##### Loading trained model ####
+    print(f"#########################################################")
+    print(f"Loading the model")
+    print(f"#########################################################")
 
     qa_model = TFAutoModelForQuestionAnswering.from_pretrained(model)
-    qa_model.load_weights(f'data/{model}.h5')
+    qa_model.load_weights('models/distilroberta.h5')
 
     #### Pre-processing ####
 
     tokenizer = AutoTokenizer.from_pretrained(model)
 
-    dataset = Dataset.from_pandas(data)
+    dataset = Dataset.from_pandas(data_df)
+
+    data_collator = DefaultDataCollator(return_tensors="tf")
 
     features = dataset.map(prepare_features,
                            batched=True,
                            remove_columns=dataset.column_names)
 
-    data_collator = DefaultDataCollator(return_tensors="tf")
-
-    dataset = features.to_tf_dataset(columns=["attention_mask", "input_ids"],
+    dataset_inf = features.to_tf_dataset(columns=["attention_mask", "input_ids"],
                                      shuffle=False,
                                      batch_size=batch_size,
                                      collate_fn=data_collator)
 
     #### Inference ####
+    print(f"#########################################################")
+    print(f"Inference")
+    print(f"#########################################################")
 
-    raw_predictions = qa_model.predict(dataset)
+    raw_predictions = qa_model.predict(dataset_inf)
 
     #### Post-processing ####
 
     final_predictions = postprocess_qa_predictions(dataset,
-                                                   features,                    raw_predictions)
+                                                   features,
+                                                   raw_predictions)
 
     #### Saving the results ####
-
+    print(f"#########################################################")
+    print(f"Saving the results in the predictions folder")
+    print(f"#########################################################")
+    
     with open(f'predictions/{model}_predictions.json', 'w') as json_file:
         json.dump(final_predictions, json_file)
